@@ -2,14 +2,20 @@
   <div class="flex flex-col h-screen">
     <!-- Chat Messages Area -->
     <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-100">
-      <div v-for="(message, index) in messages" :key="index" :class="message.isUser ? 'bg-blue-200' : 'bg-white'">
-        <div v-html="message.text" class="p-4 shadow-md rounded-md"></div>
+      <div v-for="(message, index) in messages" :key="index" :class="message.isUser ? 'bg-blue-200 text-right' : 'bg-white'">
+        <div class="p-4 shadow-md rounded-md">
+          <div class='text-right'>
+            <Button @click="copyToClipboard(message, index)" variant='disabled:opacity-50' class=''>
+              <Icon :name="message.copied ? 'tabler:clipboard-check' : 'tabler:clipboard'" color='grey'/>
+            </Button>
+          </div>
+          <div v-html="message.text"></div>
+        </div>
       </div>
     </div>
 
     <!-- Horizontal Rule -->
     <hr class="border-t-2 border-gray-300" />
-
 
     <!-- Textarea for Typing Messages -->
     <div class="p-2 bg-gray-200 relative">
@@ -19,9 +25,10 @@
         placeholder="Send a message..."
         @keydown.enter.prevent="handleEnter"
       ></Textarea>
-      <Button @click="sendMessage" class="absolute bottom-5 right-5">Send</Button> <!-- Add absolute positioning here -->
+      <Button @click="sendMessage" class="absolute bottom-5 right-5">
+        <Icon name="iconamoon:send-fill" color='white' width="20" height="20"/>
+      </Button>
     </div>
-
   </div>
 </template>
 
@@ -59,7 +66,6 @@
         }
       }
 
-
       function handleEnter(event: KeyboardEvent) {
         if (event.shiftKey) {
             // Add a new line to userInput when Shift + Enter is pressed
@@ -68,13 +74,39 @@
             // Send the message when Enter is pressed
             sendMessage();
         }
-}
+      }
+
+      function copyToClipboard(message: any, index: number) {
+        const htmlContent = message.text; // Assuming message.text contains HTML content
+
+        const tempElement = document.createElement('textarea');
+        tempElement.style.position = 'fixed';
+        tempElement.style.left = '-9999px';
+        tempElement.innerHTML = htmlContent;
+        document.body.appendChild(tempElement);
+        tempElement.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempElement);
+        navigator.clipboard.writeText(message.text).then(() => {
+          // Change the copied state and icon
+          messages.value[index].copied = true;
+
+          // Set a timeout to revert the icon back after 3 seconds
+          setTimeout(() => {
+            messages.value[index].copied = false;
+          }, 3000);
+
+        }).catch(err => {
+          console.error('Could not copy text: ', err);
+        });
+      }
 
       return {
         messages,
         userInput,
         sendMessage,
         handleEnter,
+        copyToClipboard,
       };
     },
   });
