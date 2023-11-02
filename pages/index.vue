@@ -49,8 +49,12 @@
         placeholder="Send a message..."
         @keydown.enter.prevent="handleEnter"
       ></Textarea>
-      <Button @click="sendMessage" class="absolute bottom-5 right-5 px-3">
-        <Icon name="iconamoon:send-fill" color='white' width="20" height="20"/>
+      <Button
+        @click="sendMessage"
+        class="absolute bottom-5 right-5 px-3"
+        :class="userInput.trim() ? 'text-white' : 'text-gray-500'"
+        :variant="userInput.trim() ? 'default' : 'disabled:opacity-50'">
+        <Icon name="iconamoon:send-fill" width="20" height="20"/>
       </Button>
     </div>
   </div>
@@ -71,6 +75,8 @@
       const userInput = ref('');
 
       async function sendMessage() {
+        if (!userInput.value.trim()) return;
+
         let question = userInput.value;
         messages.value.push({
           text: md.render(question),
