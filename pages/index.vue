@@ -3,17 +3,41 @@
     <!-- Chat Messages Area -->
     <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-100">
       <div v-for="(message, index) in messages" :key="index" :class="message.isUser ? 'bg-blue-200 text-right' : 'bg-white'">
-        <div class="p-4 shadow-md rounded-md">
-          <div class='text-right'>
-            <Button @click="copyToClipboard(message, index)" variant='disabled:opacity-50' class=''>
-              <Icon :name="message.copied ? 'tabler:clipboard-check' : 'tabler:clipboard'" color='grey'/>
-            </Button>
+        <div class="p-4 shadow-md">
+          <div class="flex justify-between items-start"> <!-- items-start ensures avatar is at the top -->
+
+            <!-- Avatar Container -->
+            <div class="flex-shrink-0">
+              <Avatar>
+                <AvatarImage :src='masscotImg' alt="Profile Image" />
+                <AvatarFallback>JB</AvatarFallback>
+              </Avatar>
+            </div>
+
+            <!-- Message Text -->
+            <div v-html="message.text" class="flex-grow mx-2 -mt-3"></div>
+
+            <!-- Buttons Container -->
+            <div class="flex items-center space-x-2">
+              <!-- Clipboard Button -->
+              <Button @click="copyToClipboard(message, index)" variant='disabled:opacity-50' class='px-1'>
+                <Icon :name="message.copied ? 'tabler:clipboard-check' : 'tabler:clipboard'" color='grey'/>
+              </Button>
+
+              <!-- Thumbs Up Button -->
+              <Button @click="handleThumbsUp(message, index)" variant='disabled:opacity-50' class='px-1'>
+                <Icon name="tabler:thumb-up" color='grey'/>
+              </Button>
+
+              <!-- Thumbs Down Button -->
+              <Button @click="handleThumbsDown(message, index)" variant='disabled:opacity-50' class='px-1'>
+                <Icon name="tabler:thumb-down" color='grey'/>
+              </Button>
+            </div>
           </div>
-          <div v-html="message.text"></div>
         </div>
       </div>
     </div>
-
     <!-- Horizontal Rule -->
     <hr class="border-t-2 border-gray-300" />
 
@@ -25,7 +49,7 @@
         placeholder="Send a message..."
         @keydown.enter.prevent="handleEnter"
       ></Textarea>
-      <Button @click="sendMessage" class="absolute bottom-5 right-5">
+      <Button @click="sendMessage" class="absolute bottom-5 right-5 px-3">
         <Icon name="iconamoon:send-fill" color='white' width="20" height="20"/>
       </Button>
     </div>
@@ -35,6 +59,7 @@
 <script lang="ts">
   import { defineComponent, ref } from 'vue';
   import MarkdownIt from 'markdown-it';
+  import MasscotImage from '@/assets/img/masscot.png';
 
   const md = new MarkdownIt();
 
@@ -107,6 +132,7 @@
         sendMessage,
         handleEnter,
         copyToClipboard,
+        masscotImg: MasscotImage,
       };
     },
   });

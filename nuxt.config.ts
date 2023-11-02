@@ -2,17 +2,17 @@
 import fs from 'fs'
 import path from 'path'
 export default defineNuxtConfig({
-  app: {
-    head: {
-      link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }]
-    }
-  },
   devtools: {
-    enabled: true,
+    enabled: false,
 
     timeline: {
       enabled: true,
     },
+  },
+  app: {
+    head: {
+      link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }]
+    }
   },
   server: {
     https: {
