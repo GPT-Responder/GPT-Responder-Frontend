@@ -58,10 +58,12 @@
 
 <script lang="ts">
   import { defineComponent, ref } from 'vue';
-  import MarkdownIt from 'markdown-it';
   import MasscotImage from '@/assets/img/masscot.png';
+  import MarkdownIt from 'markdown-it';
 
-  const md = new MarkdownIt();
+  const md = new MarkdownIt({
+      linkify: true
+    });
 
   export default defineComponent({
     setup() {
@@ -71,11 +73,11 @@
       async function sendMessage() {
         let question = userInput.value;
         messages.value.push({
-        text: md.render(question),
-        isUser: true,
-        iscopied: false,
-        isThumbsUp: false,
-        isThumbsDown: false,
+          text: md.render(question),
+          isUser: true,
+          iscopied: false,
+          isThumbsUp: false,
+          isThumbsDown: false,
         });
         userInput.value = '';
 
@@ -93,11 +95,24 @@
           }
           // accumulatedChunks += new TextDecoder("utf-8").decode(value);
           accumulatedChunks += new TextDecoder("utf-8").decode(value);
-          messages.value[botMessageIndex].text = md.render(accumulatedChunks.trim());
+          messages.value[botMessageIndex].text = processHtml(
+            md.render(accumulatedChunks.trim())
+          );
 
           // Save the response markdown
           messages.value[botMessageIndex].markdown = accumulatedChunks.trim();
         }
+      }
+
+      function processHtml(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const links = doc.querySelectorAll('a');
+        links.forEach(link => {
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';  // For security
+        });
+        return doc.body.innerHTML;
       }
 
       function handleEnter(event: KeyboardEvent) {
