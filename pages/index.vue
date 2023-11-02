@@ -18,7 +18,7 @@
             <div v-html="message.text" class="flex-grow mx-2 -mt-3"></div>
 
             <!-- Buttons Container -->
-            <div class="flex items-center space-x-2">
+            <div v-if="!message.isUser" class="flex items-center space-x-2">
               <!-- Clipboard Button -->
               <Button @click="copyToClipboard(message, index)" variant='disabled:opacity-50' class='px-1'>
                 <Icon :name="message.copied ? 'tabler:clipboard-check' : 'tabler:clipboard'" color='grey'/>
