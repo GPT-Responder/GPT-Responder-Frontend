@@ -1,15 +1,15 @@
 <template>
-  <div class="flex flex-col h-screen">
+  <div :class="{ 'dark': isDarkMode }" class="flex flex-col h-screen">
     <!-- Chat Messages Area -->
     <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-100">
-      <div v-for="(message, index) in messages" :key="index" :class="message.isUser ? 'bg-blue-200 text-right' : 'bg-white'">
+      <div v-for="(message, index) in messages" :key="index" :class="message.isUser ? 'bg-blue-200 text-right' : 'bg-green-200'">
         <div class="p-4 shadow-md">
           <div class="flex justify-between items-start"> <!-- items-start ensures avatar is at the top -->
 
             <!-- Avatar Container -->
             <div class="flex-shrink-0">
               <Avatar>
-                <AvatarImage :src='masscotImg' alt="Profile Image" />
+                <AvatarImage :src="message.isUser ? None : masscotImg" alt="Profile Image" />
                 <AvatarFallback>JB</AvatarFallback>
               </Avatar>
             </div>
