@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ 'dark': isDarkMode }" class="flex flex-col h-screen">
+  <div class="flex flex-col h-screen">
     <!-- Chat Messages Area -->
     <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-100">
       <div v-for="(message, index) in messages" :key="index" :class="message.isUser ? 'bg-blue-200 text-right' : 'bg-green-200'">
@@ -25,13 +25,13 @@
               </Button>
 
               <!-- Thumbs Up Button -->
-              <Button @click="handleThumbsUp(message, index)" variant='disabled:opacity-50' class='px-1'>
-                <Icon name="tabler:thumb-up" color='grey'/>
+              <Button @click="thumbsUp(index)" variant='disabled:opacity-50' class='px-1'>
+                <Icon :name="message.isThumbsUp ? 'tabler:thumb-up-filled' : 'tabler:thumb-up'" color='grey'/>
               </Button>
 
               <!-- Thumbs Down Button -->
-              <Button @click="handleThumbsDown(message, index)" variant='disabled:opacity-50' class='px-1'>
-                <Icon name="tabler:thumb-down" color='grey'/>
+              <Button @click="thumbsDown(index)" variant='disabled:opacity-50' class='px-1'>
+                <Icon :name="message.isThumbsDown ? 'tabler:thumb-down-filled' : 'tabler:thumb-down'" color='grey'/>
               </Button>
             </div>
           </div>
@@ -60,6 +60,7 @@
   import { defineComponent, ref } from 'vue';
   import MarkdownIt from 'markdown-it';
   import MasscotImage from '@/assets/img/masscot.png';
+  import TurndownService from 'turndown';
 
   const md = new MarkdownIt();
 
@@ -70,7 +71,13 @@
 
       async function sendMessage() {
         let question = userInput.value;
-        messages.value.push({ text: md.render(question), isUser: true });
+        messages.value.push({
+        text: md.render(question),
+        isUser: true,
+        iscopied: false,
+        isThumbsUp: false,
+        isThumbsDown: false,
+        });
         userInput.value = '';
 
         // Add an empty message slot for the bot's response.
@@ -82,12 +89,15 @@
         let accumulatedChunks = '';
         while (true) {
           const { done, value } = await reader.read();
-          if (done) {
+          if (done) {tabler:thumb-down
             break;
           }
           // accumulatedChunks += new TextDecoder("utf-8").decode(value);
           accumulatedChunks += new TextDecoder("utf-8").decode(value);
           messages.value[botMessageIndex].text = md.render(accumulatedChunks.trim());
+
+          // Save the response markdown
+          messages.value[botMessageIndex].markdown = accumulatedChunks.trim();
         }
       }
 
@@ -102,17 +112,7 @@
       }
 
       function copyToClipboard(message: any, index: number) {
-        const htmlContent = message.text; // Assuming message.text contains HTML content
-
-        const tempElement = document.createElement('textarea');
-        tempElement.style.position = 'fixed';
-        tempElement.style.left = '-9999px';
-        tempElement.innerHTML = htmlContent;
-        document.body.appendChild(tempElement);
-        tempElement.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempElement);
-        navigator.clipboard.writeText(message.text).then(() => {
+        navigator.clipboard.writeText(message.markdown).then(() => {
           // Change the copied state and icon
           messages.value[index].copied = true;
 
@@ -126,13 +126,24 @@
         });
       }
 
+      function thumbsUp(index: number) {
+        messages.value[index].isThumbsUp = !(messages.value[index].isThumbsUp);
+        messages.value[index].isThumbsDown = false;
+      }
+
+      function thumbsDown(index: number) {
+        messages.value[index].isThumbsUp = false;
+        messages.value[index].isThumbsDown = !(messages.value[index].isThumbsDown);
+      }
       return {
+        masscotImg: MasscotImage,
         messages,
         userInput,
         sendMessage,
         handleEnter,
         copyToClipboard,
-        masscotImg: MasscotImage,
+        thumbsUp,
+        thumbsDown,
       };
     },
   });
