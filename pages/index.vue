@@ -47,7 +47,8 @@
         v-model="userInput" 
         class="resize-none bg-white-100 pr-20" 
         placeholder="Send a message..."
-        @keydown.enter.prevent="handleEnter"
+        @keydown.enter="handleEnter"
+        variant='expandable'
       ></Textarea>
       <Button
         @click="sendMessage"
@@ -122,13 +123,10 @@
       }
 
       function handleEnter(event: KeyboardEvent) {
-        if (event.shiftKey) {
-            // Add a new line to userInput when Shift + Enter is pressed
-            userInput.value += '\n';
-        } else {
-            // Send the message when Enter is pressed
-            sendMessage();
-        }
+          if (event.key === "Enter" && !event.shiftKey) {
+              // Send the message when Enter is pressed without Shift
+              sendMessage();
+          }
       }
 
       function copyToClipboard(message: any, index: number) {

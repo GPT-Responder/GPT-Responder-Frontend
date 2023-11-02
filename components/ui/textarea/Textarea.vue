@@ -1,11 +1,18 @@
 <script setup lang="ts">
+import { ref, watchEffect } from 'vue';
 import { useVModel } from '@vueuse/core'
 import { cn } from '@/lib/utils'
+import { textareaVariants } from './index'
 
-const props = defineProps<{
+interface Props {
+  variant?: NonNullable<Parameters<typeof textareaVariants>[0]>['variant']
   defaultValue?: string | number
   modelValue?: string | number
-}>()
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'default',
+})
 
 const emits = defineEmits<{
   (e: 'update:modelValue', payload: string | number): void
@@ -15,8 +22,38 @@ const modelValue = useVModel(props, 'modelValue', emits, {
   passive: true,
   defaultValue: props.defaultValue,
 })
+
+const textareaRef = ref(null);
+
+const adjustTextareaHeight = () => {
+  if (props.variant === 'expandable') {
+    const textarea = textareaRef.value;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      const maxHeight = 200;
+      textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px';
+    }
+  }
+}
+
+watchEffect(() => {
+  adjustTextareaHeight(); // Adjust height when modelValue changes
+})
+
+const handleKeydown = (event) => {
+  if (event.key === 'Enter' && !event.shiftKey && props.variant === 'expandable') {
+    adjustTextareaHeight();
+  }
+}
 </script>
 
 <template>
-  <textarea v-model="modelValue" :class="cn('flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50', $attrs.class ?? '')" />
+  <textarea 
+    v-model="modelValue" 
+    ref="textareaRef"
+    :class="cn(textareaVariants({ variant: props.variant }), $attrs.class ?? '')"
+    @input="adjustTextareaHeight"
+    @keydown="handleKeydown"
+  />
 </template>
+
