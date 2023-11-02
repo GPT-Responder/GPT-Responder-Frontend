@@ -60,7 +60,6 @@
   import { defineComponent, ref } from 'vue';
   import MarkdownIt from 'markdown-it';
   import MasscotImage from '@/assets/img/masscot.png';
-  import TurndownService from 'turndown';
 
   const md = new MarkdownIt();
 
